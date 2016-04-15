@@ -118,13 +118,16 @@ sub _pipes {
 
 sub _process_from_def {
   my $self  = shift;
-  my $file  = shift || 'assetpack.def';
-  my $asset = $self->store->file($file);
+  my $name  = shift || 'assetpack.def';
+  my $file  = $name =~ /^(.*)\.([^.]+)$/ ? join('.', $1, $self->_app->mode, $2) : $name;
   my $topic = '';
-  my %process;
+  my ($asset, %process);
+
+  $asset = $self->store->file($file);
+  $asset = $self->store->file($name) if !$asset;
 
   die qq(Unable to load "$file".) unless $asset;
-  diag qq(Loading asset definitions from "$file".) if DEBUG;
+  diag qq(Loading asset definitions from "@{[$asset->name]}".) if DEBUG;
 
   for (split /\r?\n/, $asset->slurp) {
     s/\s*\#.*//;
